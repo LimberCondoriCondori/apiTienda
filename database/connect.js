@@ -7,4 +7,5 @@ mongoose.connect("mongodb://127.0.0.1:27017/apirestStore", {
 }).catch(err => {
     console.log('Error en la conexion', err);
 });
+mongoose.set('useFindAndModify', false);
 module.exports = mongoose;
