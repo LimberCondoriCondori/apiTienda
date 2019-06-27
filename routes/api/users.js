@@ -67,7 +67,6 @@ router.post("/", (req, res) => {
   var surname_reg = /\w{3,}/g
   var email_reg = /\w{1,}@[\w.]{1,}[.][a-z]{2,3}/g
   var phone_reg = /\d{7}[0-9]/g
-  var ci_reg =/\d{1,}\w{1,3}/g
   var password_reg =/\w{6,}/g
   console.log(users);
   if(users.firstname.match(firstname_reg) == null){
@@ -95,12 +94,6 @@ router.post("/", (req, res) => {
     return;
   }
 
-  if(users.ci==undefined || users.ci.match(ci_reg) == null){
-    res.status(400).json({
-      msn : "el ci no puede estar vacio"
-    });
-    return;
-  }
   if(users.phone.match(phone_reg) == null||users.phone.length!=8){
     res.status(400).json({
       msn : "el telefono es incorrecto"
@@ -112,7 +105,6 @@ router.post("/", (req, res) => {
     surname: users.surname,
     email: users.email,
     phone: users.phone,
-    ci: users.ci,
     password: sha1(users.password),
     registerdate: new Date
   };
@@ -142,7 +134,7 @@ router.patch("/", function (req, res) {
   var id = req.query.id;
   //Collection of data
   var keys = Object.keys(params);
-  var updatekeys = ["firstname", "surname", "email", "phone", "ci"];
+  var updatekeys = ["firstname", "surname", "email", "phone"];
   var newkeys = [];
   var values = [];
   //seguridad
