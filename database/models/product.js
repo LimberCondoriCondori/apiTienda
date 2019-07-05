@@ -6,6 +6,7 @@ const productSchema ={
     name: String,
     price: String,
     description: String,
+    cant: String,
     registerdate: Date,
     picture: String
 };

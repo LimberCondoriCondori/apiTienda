@@ -27,10 +27,6 @@ function verifytoken (req, res, next) {
       });
   }
 }
-
-
-
-
 router.post("/login", (req, res, next) => {
   var email = req.body.email;
   var password = req.body.password  ;
@@ -48,8 +44,8 @@ router.post("/login", (req, res, next) => {
       jwt.sign({email: doc.email, password: sha1(doc.password)}, "seponeunallavesecreta", (err, token) => {
           console.log("sesion exitosa");
           res.status(200).json({
-            token : token
-
+            token : token,
+            idUser: doc._id
           });
       })
     } else {

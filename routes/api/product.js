@@ -1,33 +1,29 @@
 var express = require('express');
 var multer = require('multer');
 var router = express.Router();
-var fs = require('fs');
 var jwt = require('jsonwebtoken');
+var fmr= require('../../utils/FilesManagerReq');
+fmr.setPathStorage('productos');
+fmr.setDefaultNameAndExtencion("IMG",".jpg");
+
+router.use(fmr.cathFile());
 
 const PRODUCTS = require('../../database/models/product');
 
-var storage_product = multer.diskStorage({
-  destination: "./public/product",
-  filename: function (req, file, cb) {
-    console.log("-------------------------");
-    console.log(file);
-    cb(null, "PRODUCTO_" + Date.now() + ".jpg");
-  }
-});
-var upload_product = multer({
-  storage: storage_product
-}).single("img");
 //verificacion verifytoken
 
 //Middelware
 function verifytoken (req, res, next) {
   //Recuperar el header
+  console.log(req.headers);
+  console.log(req.body);
   const header = req.headers["authorization"];
   if (header  == undefined) {
       res.status(403).json({
         msn: "No autotizado"
       })
   } else {
+
       req.token = header.split(" ")[1];
       jwt.verify(req.token, "seponeunallavesecreta", (err, authData) => {
         if (err) {
@@ -65,21 +61,33 @@ router.post("/",verifytoken,(req, res)=>{
     });
     return;
   }
+  if(req.body.cant==undefined){
+    res.status(200).json({
+      msn : "cantidad no introducida"
+    });
+    return;
+  }
   req.body.registerdate= new Date;
   //validacion
   var productos= new PRODUCTS(req.body);
 
   console.log(productos);
   console.log("ruta del modelo encontrado");
-  productos.save().then((rr)=>{
-      res.status(200).json({
+  productos.save().then((docs)=>{
+    console.log(docs);
+    res.status(200).json({
+      id:docs._id
+    }
+    );
+  }).catch((rr)=>{
+      res.status(404).json({
         "msn": rr
       });
   });
 
 });
 //n subida de imagenes
-router.post("/uploadproduct",verifytoken,(req,res)=>{
+router.post("/uploadImg",verifytoken,(req,res)=>{
   var id =req.query.id;
   if(id == null){
     res.status(300).json({
@@ -95,34 +103,21 @@ router.post("/uploadproduct",verifytoken,(req,res)=>{
       return;
     }
     if(docs.length==1){
-      upload_menu(req,res,(err)=>{
-        if(err){
-          res.status(300).json({
-            "msn":"error al subir imagen"
-          });
-          return;
-        }
-        var url = req.file.path.replace(/public/g, "");
-
-        PRODUCTS.update({_id: id}, {$set:{picture:url}}, (err, docs) => {
-          if (err) {
-            res.status(200).json({
-              "msn" : err
+          let imagename=req.file.filename;
+          PRODUCTS.update({_id: id}, {$set:{picture:imagename}}, (err, docs) => {
+            if (err) {
+              res.status(200).json({
+                "msn" : err
             });
-            return;
-          }
-          res.status(200).json(docs);
-        });
-        res.status(200).json({
-          "msn": "imagen subido con exito"
-        });
-      });
+              return;
+            }
+            res.status(200).json(docs);
+          });
     }else{
       res.status(300).json({
         "msn":"el id del producto no a sido encontrado"
       });
     }
-
   });
 });
 
@@ -209,6 +204,12 @@ router.patch('/:id', function (req, res, next) {
           })
       }
   })
+});
+
+router.get('/downloadImg',verifytoken,(req,res)=>{
+  var img=filemanager.getFile(req.query.img);
+  res.contentType('image/jpeg');
+  res.status(200).send(img);
 });
 
 module.exports = router;
