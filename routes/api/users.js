@@ -30,7 +30,6 @@ function verifytoken (req, res, next) {
 router.post("/login", (req, res, next) => {
   var email = req.body.email;
   var password = req.body.password  ;
-  console.log(email,password);
   var result = USERS.findOne({email: email,password: sha1(password)}).exec((err, doc) => {
     if (err) {
       console.log("error");
@@ -56,6 +55,37 @@ router.post("/login", (req, res, next) => {
     }
   });
 });
+
+router.post("/login_with_google",(req,res)=>{
+  var email=req.body.email;
+  var firstname=req.body.firstname;
+  USERS.findOne({email: email,firstname: firstname}).exec((err, doc) => {
+      if(!doc){
+          req.body.password=sha1(req.body.password);
+          req.body.registerdate=Date.now();
+          var user=new USERS(req.body);
+          user.save().then((docs)=>{
+            jwt.sign({email: docs.email, password: docs.password}, "seponeunallavesecreta", (err, token) => {
+              console.log("sesion exitosa");
+              res.status(200).json({
+                token : token,
+                idUser: docs._id
+              });
+            });
+          }); 
+      }else{
+        jwt.sign({email: doc.email, password: doc.password}, "seponeunallavesecreta", (err, token) => {
+          console.log("sesion exitosa");
+          res.status(200).json({
+            token : token,
+            idUser: doc._id
+          });
+        });
+      }
+  });
+
+});
+
 router.post("/", (req, res) => {
   var users = req.body;
   //Validacion de datosssss
@@ -90,12 +120,6 @@ router.post("/", (req, res) => {
     return;
   }
 
-  if(users.phone.match(phone_reg) == null||users.phone.length!=8){
-    res.status(400).json({
-      msn : "el telefono es incorrecto"
-    });
-    return;
-  }
   var usersdata = {
     firstname: users.firstname,
     surname: users.surname,
@@ -114,7 +138,7 @@ router.post("/", (req, res) => {
 
 router.get("/",(req, res) => {
 
-  USERS.find({}).exec((err, docs) => {
+  USERS.find(req.query).exec((err, docs) => {
     if (err) {
       res.status(500).json({
         "msn" : "Error en la db"

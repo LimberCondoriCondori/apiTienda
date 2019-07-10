@@ -3,10 +3,10 @@ var multer = require('multer');
 var router = express.Router();
 var jwt = require('jsonwebtoken');
 var fmr= require('../../utils/FilesManagerReq');
-fmr.setPathStorage('productos');
+fmr.setPathStorage('products');
 fmr.setDefaultNameAndExtencion("IMG",".jpg");
 
-router.use(fmr.cathFile());
+//router.use(fmr.catchFile());
 
 const PRODUCTS = require('../../database/models/product');
 
@@ -15,8 +15,9 @@ const PRODUCTS = require('../../database/models/product');
 //Middelware
 function verifytoken (req, res, next) {
   //Recuperar el header
+
   console.log(req.headers);
-  console.log(req.body);
+  console.log(req.query);
   const header = req.headers["authorization"];
   if (header  == undefined) {
       res.status(403).json({
@@ -87,7 +88,7 @@ router.post("/",verifytoken,(req, res)=>{
 
 });
 //n subida de imagenes
-router.post("/uploadImg",verifytoken,(req,res)=>{
+router.post("/uploadImg",verifytoken,fmr.catchFile(),(req,res)=>{
   var id =req.query.id;
   if(id == null){
     res.status(300).json({
@@ -103,6 +104,7 @@ router.post("/uploadImg",verifytoken,(req,res)=>{
       return;
     }
     if(docs.length==1){
+
           let imagename=req.file.filename;
           PRODUCTS.update({_id: id}, {$set:{picture:imagename}}, (err, docs) => {
             if (err) {
@@ -175,8 +177,27 @@ router.get("/",(req,res)=>{
 
 });
 
+router.get("/user",(req,res)=>{
+  var idUser=req.query.idUser;
+  var skip = 0;
+  var limit = 50;
+  if(req.query.skip != undefined)
+    skip = req.query.skip;
+  if(req.query.limit != undefined)
+    limit = req.query.limit;
+  PRODUCTS.find({idUser:idUser}).skip(skip).limit(limit).exec((err,docs)=>{
+    if(err){
+      res.status(500).json({
+        "msn":"Error en la base de datos"
+      });
+      return;
+    }
+    res.status(200).json(docs);
+  });
 
-router.delete("", verifytoken, (req, res) => {
+});
+
+router.delete("/", verifytoken, (req, res) => {
   //var url = req.url;
   var id = req.query.id;
   PRODUCTS.find({_id : id}).remove().exec( (err, docs) => {
@@ -206,8 +227,8 @@ router.patch('/:id', function (req, res, next) {
   })
 });
 
-router.get('/downloadImg',verifytoken,(req,res)=>{
-  var img=filemanager.getFile(req.query.img);
+router.get('/downloadImg',(req,res)=>{
+  var img=fmr.getFile(req.query.img);
   res.contentType('image/jpeg');
   res.status(200).send(img);
 });

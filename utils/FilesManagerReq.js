@@ -1,6 +1,6 @@
 var fs = require('fs');
 var multer=require('multer');
-var pathStorage="./public/";
+var pathStorage="./public/images/";
 var Name="File";
 var Extencion="";
 module.exports.setPathStorage=function(dir){
@@ -10,10 +10,11 @@ module.exports.setDefaultNameAndExtencion = function(name,extecion){
   Name=name;
   Extencion=extecion;
 }
-module.exports.cathFile = function(){
+module.exports.catchFile = function(){
     let diskStr={
       destination: pathStorage,
       filename: function(req,res,cb){
+
         cb(null, Name + "_" + Date.now() + Extencion);
       }
     };
@@ -23,5 +24,6 @@ module.exports.cathFile = function(){
 }
 module.exports.getFile=function(name){
   var file = fs.readFileSync(pathStorage + "/" + name);
+  
   return file;
 };
