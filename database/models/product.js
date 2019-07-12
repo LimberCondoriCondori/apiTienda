@@ -8,7 +8,13 @@ const productSchema ={
     description: String,
     cant: Number,
     registerdate: Date,
-    picture: String
+    picture: String,
+    categoria:{
+        type:String,
+        required:true,
+        enum:["electrodomesticos","tecnologia","vestir"]
+    }
+    
 };
 //Nombre, precio, descripción, fechaderegistro, fotografía del producto
 const product = mongoose.model('product', productSchema);

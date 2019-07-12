@@ -8,7 +8,8 @@ var indexRouter = require('./routes/index');
 //var usersRouter = require('./routes/users');
 var usersRouter = require('./routes/api/users');
 var productRouter = require('./routes/api/product');
-var detailsRouter = require('./routes/api/details');
+var citaRouter =require('./routes/api/cita');
+var chatRouter = require('./routes/api/chat');
 var compraRouter = require('./routes/api/compra');
 var app = express();
 
@@ -25,8 +26,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/product', productRouter);
-app.use('/details', detailsRouter);
 app.use('/compra', compraRouter); 
+app.use('/cita',citaRouter);
+app.use("/chat",chatRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
@@ -46,4 +48,31 @@ var port = 8001;
 app.listen(port,()=>{
   console.log("corriendo en el puerto" + port);
 })
+//parte del chat para el servicio
+const appSocket=require("express")();
+var serverSocketIO=appSocket.listen(8002,()=>{
+  console.log("socket corriendo en el puerto: "+8002);
+});
+const socketIO=require("socket.io");
+const IO=socketIO(serverSocketIO);
+const chatCtl=require('./routes/api/chatController');
+IO.on('connection',(mysocket)=>{
+  console.log("usuario conectado");
+  IO.emit("5d27aaeb2602945efbb5fc87",{msn:"hello",idUser:"5d27aaeb2602945efbb5fc87"}); 
+  mysocket.on("msnserver",async(docs)=>{
+    console.log(docs);
+    chatCtl.setMessage(docs);
+    var chat=await chatCtl.get({_id:docs.idChat});
+    
+    if(chat[0].idVendedor==docs.idUser){
+      IO.emit(chat[0].idComprador,docs);
+    }
+    else{
+      IO.emit(chat[0].idVendedor,docs);
+    }
+});
+});
+
+
+//fin parte chat servicio
 module.exports = app;

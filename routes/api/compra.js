@@ -1,10 +1,9 @@
 var express = require('express');
-var multer = require('multer');
 var router = express.Router();
-var fs = require('fs');
 var jwt = require('jsonwebtoken');
 
 const COMPRAS = require('../../database/models/compra');
+const CITA = require('../../database/models/cita');
 
 function verifytoken (req, res, next) {
   //Recuperar el header
@@ -29,25 +28,19 @@ function verifytoken (req, res, next) {
 
 router.post("/",verifytoken,(req, res)=>{
   var infocompra=req.body;
+  infocompra.registerDate=new Date;
   // validacion
 
   //validacion
-  var compradata = {
-    idusers: infocompra.idusers,
-    pagoTotal: infocompra.pagoTotal,
-    lat: infocompra.lat,
-    long: infocompra.long,
-    registerdate: new Date
-
-  }
   //-------
   //inforder["registerdate"]=new Date();
   //console.log("servicio encontrado");
-  var compra= new COMPRAS(compradata);
+  var compra= new COMPRAS(infocompra);
   //console.log("ruta del modelo encontrado");
   compra.save().then((rr)=>{
       res.status(200).json({
-        "msn": "orden de compra agregado con exito"
+        "msn": "orden de compra agregado con exito",
+
       });
   });
 
@@ -56,7 +49,7 @@ router.post("/",verifytoken,(req, res)=>{
 router.get("/user",(req,res)=>{
   var idu = req.query.idu;
 
-  COMPRAS.find({idusers: idu}).exec((err,docs)=>{
+  COMPRAS.find({idUsers: idu}).exec((err,docs)=>{
     if(err){
       res.status(500).json({
         "msn":"Error en la base de datos"
@@ -69,7 +62,7 @@ router.get("/user",(req,res)=>{
 });
 
 
-router.delete("", verifytoken, (req, res) => {
+router.delete("/", verifytoken, (req, res) => {
   //var url = req.url;
   var id = req.query.id;
   COMPRAS.find({_id : id}).remove().exec( (err, docs) => {
@@ -80,8 +73,8 @@ router.patch("/",verifytoken,(req,res)=>{
   var params = req.body;
   var idcom = req.query.idcom;
   //Collection of data
-  var keys = Object.keys(params);
-  var updatekeys = ["pagoTotal", "lat","long"];
+  /*var keys = Object.keys(params);
+  var updatekeys = ["pagoTotal"];
   var newkeys = [];
   var values = [];
   //seguridad
@@ -96,8 +89,8 @@ router.patch("/",verifytoken,(req,res)=>{
   for (var i  = 0; i < newkeys.length; i++) {
       objupdate[newkeys[i]] = values[i];
   }
-  console.log(objupdate);
-  COMPRAS.findOneAndUpdate({_id: idcom}, objupdate ,(err, docs) => {
+  console.log(objupdate);*/
+  COMPRAS.findOneAndUpdate({_id: idcom}, req.body ,(err, docs) => {
     if (err) {
       res.status(500).json({
           msn: "Existe un error en la base de datos"

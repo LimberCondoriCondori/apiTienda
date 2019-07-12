@@ -2,13 +2,12 @@ const mongoose = require('../connect');
 const Schema = mongoose.Schema;
 
 const compraSchema = Schema({
-
-    idusers: String,
+    idComprador: String,
+    idVendedor:String,
+    idProducto: String,
     pagoTotal: String,
-    lat: String,
-    long: String,
-    registerdate: Date
-
+    registerDate: Date,
+    cantidad:Number,
 })
 
 const compra = mongoose.model('compra',compraSchema);
