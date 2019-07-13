@@ -42,22 +42,22 @@ router.post("/",verifytoken,(req, res)=>{
   //var infoproduct=req.body;
   // validacion
   var name_reg = /\w{3,}/g
-   var price_reg =/\d{1,3}.\d{0,2}/g
+   var price_reg =/\d{0,3}.\d{0,2}/g
    var des_reg =/\w{3,}/g
    if(req.body.name.match(name_reg) == null){
-    res.status(200).json({
+    res.status(400).json({
       msn : "nombre de producto invalido "
     });
     return;
    }
    if(req.body.price.match(price_reg) == null){
-    res.status(200).json({
+    res.status(400).json({
       msn : "precio invalido"
     });
     return;
    }
    if(req.body.description.match(des_reg) == null){
-    res.status(200).json({
+    res.status(400).json({
       msn : "descripcion no introducida"
     });
     return;
@@ -123,30 +123,21 @@ router.post("/uploadImg",verifytoken,fmr.catchFile(),(req,res)=>{
   });
 });
 
-router.patch("/",verifytoken,(req,res)=>{
-  var params = req.body;
+router.patch("/",(req,res)=>{
+  var params = {};
   var id = req.query.id;
   //Collection of data
-  var keys = Object.keys(params);
-  var updatekeys = ["name", "price", "description"];
-  var newkeys = [];
-  var values = [];
-  //seguridad
-  for (var i  = 0; i < updatekeys.length; i++) {
-    var index = keys.indexOf(updatekeys[i]);
-    if (index != -1) {
-        newkeys.push(keys[index]);
-        values.push(params[keys[index]]);
-    }
+  params={
+    name:req.body.name,
+    description:req.body.description,
+    price:req.body.price,
+    cant:req.body.cant
   }
-  var objupdate = {}
-  for (var i  = 0; i < newkeys.length; i++) {
-      objupdate[newkeys[i]] = values[i];
-  }
-  console.log(objupdate);
-  PRODUTS.findOneAndUpdate({_id: id}, objupdate ,(err, docs) => {
+  console.log(params);
+  PRODUCTS.findOneAndUpdate({_id: id}, params ,(err, docs) => {
     if (err) {
-      res.status(500).json({
+      console.log(err);
+      res.status(400).json({
           msn: "Existe un error en la base de datos"
       });
       return;
@@ -165,7 +156,7 @@ router.get("/",(req,res)=>{
     skip = req.query.skip;
   if(req.query.limit != undefined)
     limit = req.query.limit;
-  PRODUCTS.find({}).skip(skip).limit(limit).exec((err,docs)=>{
+  PRODUCTS.find(req.query).skip(skip).limit(limit).exec((err,docs)=>{
     if(err){
       res.status(500).json({
         "msn":"Error en la base de datos"
@@ -204,15 +195,12 @@ router.delete("/", verifytoken, (req, res) => {
       res.status(200).json(docs);
   });
 });
-router.patch('/:id', function (req, res, next) {
-  let idProduct = req.params.id;
-  let productData = {};
-  Object.keys(req.body).forEach((key) => {
-      productData[key] = req.body[key];
-  })
-
-  PRODUCTS.findByIdAndUpdate(idProduct, productData).exec((err, result) => {
-      if (err) {
+router.patch('/', function (req, res, next) {
+  let idProduct = req.query.id;
+  PRODUCTS.findByIdAndUpdate(idProduct, req.body).exec((err, result) => {
+    console.log(result);  
+    if (err) {
+          console.log(err);
           res.status(500).json({
               error: err
           });
@@ -222,9 +210,9 @@ router.patch('/:id', function (req, res, next) {
           res.status(200).json({
               message: "Se actualizaron los datos"
 
-          })
+          });
       }
-  })
+  });
 });
 
 router.get('/downloadImg',(req,res)=>{

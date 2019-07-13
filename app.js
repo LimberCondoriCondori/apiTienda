@@ -58,19 +58,18 @@ const IO=socketIO(serverSocketIO);
 const chatCtl=require('./routes/api/chatController');
 IO.on('connection',(mysocket)=>{
   console.log("usuario conectado");
-  IO.emit("5d27aaeb2602945efbb5fc87",{msn:"hello",idUser:"5d27aaeb2602945efbb5fc87"}); 
+  //IO.emit("5d27aaeb2602945efbb5fc87",{msn:"hello",idUser:"5d27aaeb2602945efbb5fc87"}); 
   mysocket.on("msnserver",async(docs)=>{
     console.log(docs);
-    chatCtl.setMessage(docs);
+    let resultm=chatCtl.setMessage(docs);
     var chat=await chatCtl.get({_id:docs.idChat});
     
-    if(chat[0].idVendedor==docs.idUser){
-      IO.emit(chat[0].idComprador,docs);
-    }
-    else{
-      IO.emit(chat[0].idVendedor,docs);
-    }
-});
+      IO.emit(chat[0].idComprador,resultm);
+      IO.emit(chat[0].idVendedor,resultm);
+  });
+  mysocket.on("showMsn",(data)=>{
+    chatCtl.updateMessage(data);
+  });
 });
 
 

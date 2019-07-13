@@ -5,7 +5,7 @@ const compraSchema = Schema({
     idComprador: String,
     idVendedor:String,
     idProducto: String,
-    pagoTotal: String,
+    pagoTotal: Number,
     registerDate: Date,
     cantidad:Number,
 })

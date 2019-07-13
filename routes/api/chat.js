@@ -24,10 +24,11 @@ function verifytoken (req, res, next) {
     }
 }
 
-//router.use(verifytoken);
+router.use(verifytoken);
 
-router.post("/",(req,res)=>{
-    let doc=CHAT.nuevo(req.body);
+router.post("/",async(req,res)=>{
+    let doc= await CHAT.nuevo(req.body);
+    console.log(doc);
     if(doc)
         res.status(200).json(doc);
 });
@@ -59,6 +60,7 @@ router.get("/",async (req,res)=>{
             _id:chats[numC]._id,
             idVendedor:chats[numC].idVendedor,
             idComprador:chats[numC].idComprador,
+            idProduct:chats[numC].idProduct,
             msns:messU
         };
     }

@@ -25,7 +25,7 @@ function verifytoken (req, res, next) {
   }
 }
 
-router.use(verifytoken);
+//router.use(verifytoken);
 
 router.get("/",(req,res)=>{
     CITAS.find(req.query,(err,docs)=>{

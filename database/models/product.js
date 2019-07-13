@@ -11,7 +11,7 @@ const productSchema ={
     picture: String,
     categoria:{
         type:String,
-        required:true,
+        //required:true,
         enum:["electrodomesticos","tecnologia","vestir"]
     }
     

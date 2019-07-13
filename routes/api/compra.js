@@ -28,19 +28,20 @@ function verifytoken (req, res, next) {
 
 router.post("/",verifytoken,(req, res)=>{
   var infocompra=req.body;
-  infocompra.registerDate=new Date;
+  //infocompra.registerDate=new Date;
   // validacion
-
+  console.log(infocompra);
   //validacion
   //-------
   //inforder["registerdate"]=new Date();
   //console.log("servicio encontrado");
   var compra= new COMPRAS(infocompra);
   //console.log("ruta del modelo encontrado");
+  console.log(compra);
   compra.save().then((rr)=>{
       res.status(200).json({
+        id:compra._id,
         "msn": "orden de compra agregado con exito",
-
       });
   });
 

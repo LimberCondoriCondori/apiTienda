@@ -2,14 +2,12 @@ const mongoose=require('../connect');
 
 var citaSchema=new mongoose.Schema({
     idCompra:String,
-    date:Date,
+    date:String,
     time:String,
     lat:Number,
     long:Number,
-    accept:{
-        type:Boolean,
-        default:false
-    },
+    street:String,
+    
     state:{
         type:Boolean,
         default:false
