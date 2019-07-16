@@ -60,10 +60,10 @@ IO.on('connection',(mysocket)=>{
   console.log("usuario conectado");
   //IO.emit("5d27aaeb2602945efbb5fc87",{msn:"hello",idUser:"5d27aaeb2602945efbb5fc87"}); 
   mysocket.on("msnserver",async(docs)=>{
-    console.log(docs);
+    //console.log(docs);
     let resultm=chatCtl.setMessage(docs);
     var chat=await chatCtl.get({_id:docs.idChat});
-    
+    //console.log(resultm);
       IO.emit(chat[0].idComprador,resultm);
       IO.emit(chat[0].idVendedor,resultm);
   });
