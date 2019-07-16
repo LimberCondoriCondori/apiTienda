@@ -62,6 +62,21 @@ router.get("/user",(req,res)=>{
 
 });
 
+router.get("/",(req,res)=>{
+  //var idu = req.query.idu;
+
+  COMPRAS.find(req.query).exec((err,docs)=>{
+    if(err){
+      res.status(500).json({
+        "msn":"Error en la base de datos"
+      });
+      return;
+    }
+    res.status(200).json(docs);
+  });
+
+});
+
 
 router.delete("/", verifytoken, (req, res) => {
   //var url = req.url;
